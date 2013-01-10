@@ -2,7 +2,7 @@
  * Copyright (C) 2010-2011, Inclusive Design Research Centre
  */
 
-package ca.idi.tekla.sep;
+package ca.idi.tecla.framework;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,11 +11,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.UUID;
 
-import ca.idi.tekla.R;
-import ca.idi.tekla.TeclaApp;
-import ca.idi.tekla.TeclaPrefs;
-import ca.idi.tecla.framework.SepManager;
-import ca.idi.tecla.framework.SwitchEvent;
+import ca.idi.tecla.framework.util.Helper;
+import ca.idi.tecla.framework.util.Persistence;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -42,6 +39,16 @@ public class SwitchEventProvider extends Service implements Runnable {
 	 * Tag used for logging in this class
 	 */
 	private static final String CLASS_TAG = "SEP: ";
+
+	/**
+	 * Tag used for logging in the whole framework
+	 */
+	public static final String TAG = "TeclaFramework";
+	
+	/**
+	 * Main debug switch, turns on/off debugging for the whole app
+	 */
+	public static final boolean DEBUG = true	;
 
 	/**
 	 * "Well-known" Serial Port Profile UUID as specified at:
@@ -103,6 +110,9 @@ public class SwitchEventProvider extends Service implements Runnable {
 	// VARIABLES FOR SYSTEM SERVICES
 	private BluetoothAdapter mBluetoothAdapter;
 
+	private Persistence persistence;
+	private Context context;
+	
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -111,9 +121,11 @@ public class SwitchEventProvider extends Service implements Runnable {
 	}
 
 	private void init() {
-		//if (TeclaApp.DEBUG) android.os.Debug.waitForDebugger();
-		if (TeclaApp.DEBUG) Log.d(TeclaApp.TAG, CLASS_TAG + "Creating SEP...");
-
+		//if (SwitchEventProvider.DEBUG) android.os.Debug.waitForDebugger();
+		if (SwitchEventProvider.DEBUG) Log.d(SwitchEventProvider.TAG, CLASS_TAG + "Creating SEP...");
+		
+		persistence = new Persistence(this);
+		
 		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
 		//Intents & Intent Filters
@@ -130,6 +142,8 @@ public class SwitchEventProvider extends Service implements Runnable {
 		mShyCounter = 0;
 		mBoldCounter = 0;
 		mIsBold = false;
+		
+		context = this;
 	}
 	
 	@Override
@@ -137,7 +151,7 @@ public class SwitchEventProvider extends Service implements Runnable {
 		super.onDestroy();
 		stopMainThread();
 		unregisterReceiver(mReceiver);
-		Log.i(TeclaApp.TAG, CLASS_TAG + "Service Stopped");
+		Log.i(SwitchEventProvider.TAG, CLASS_TAG + "Service Stopped");
 	}
 
 	@Override
@@ -153,28 +167,28 @@ public class SwitchEventProvider extends Service implements Runnable {
 
 			if (!BluetoothAdapter.checkBluetoothAddress(shieldAddress)) {
 				// MAC is invalid, try saved address
-				shieldAddress = TeclaApp.persistence.getShieldAddress();
+				shieldAddress = persistence.getShieldAddress();
 			}
 			if (shieldAddress != null) {
 				// MAC is valid
 				success = true;
 				// Save shield info
-				TeclaApp.persistence.setShieldAddress(shieldAddress);
+				persistence.setShieldAddress(shieldAddress);
 				startMainThread();
 			} else {
 				// MAC is invalid, unset connect to shield preference
-				TeclaApp.persistence.setConnectToShield(false);
-				Log.e(TeclaApp.TAG, CLASS_TAG + "Could not connect to shield");
+				persistence.setConnectToShield(false);
+				Log.e(SwitchEventProvider.TAG, CLASS_TAG + "Could not connect to shield");
 			}
 
 			if (success) {
-				Log.d(TeclaApp.TAG, CLASS_TAG + "Successfully started service");
+				Log.d(SwitchEventProvider.TAG, CLASS_TAG + "Successfully started service");
 				mServiceStarted = true;
 			} else {
-				Log.d(TeclaApp.TAG, CLASS_TAG + "Failed to start service");
+				Log.d(SwitchEventProvider.TAG, CLASS_TAG + "Failed to start service");
 			}
 		} else {
-			Log.w(TeclaApp.TAG, CLASS_TAG + "SEP already started, ignored start command.");
+			Log.w(SwitchEventProvider.TAG, CLASS_TAG + "SEP already started, ignored start command.");
 			success = true;
 		}
 
@@ -205,9 +219,9 @@ public class SwitchEventProvider extends Service implements Runnable {
 		int inByte;
 		boolean gotStreams;
 
-		shieldAddress = TeclaApp.persistence.getShieldAddress();
+		shieldAddress = persistence.getShieldAddress();
 		while(mKeepReconnecting) {
-			Log.i(TeclaApp.TAG, CLASS_TAG + "Attempting connection to TeclaShield: " + shieldAddress);
+			Log.i(SwitchEventProvider.TAG, CLASS_TAG + "Attempting connection to TeclaShield: " + shieldAddress);
 			// The code below is an attempt to poke the bluetooth chip on devices that put it on stand-by when the
 			// screen is off (e.g., Samsung Galaxy series). For additional details see
 			// https://github.com/jorgesilva/TeclaAccess/issues/11
@@ -215,14 +229,14 @@ public class SwitchEventProvider extends Service implements Runnable {
 				mShyCounter++;
 				if (mShyCounter >= SHY_RECONNECT_ATTEMPTS) {
 					mShyCounter = 0;
-					TeclaApp.getInstance().holdWakeLock();
+					Helper.holdWakeLock();
 					mIsBold = true;
 				}
 			} else {
 				mBoldCounter++;
 				if (mBoldCounter >= BOLD_RECONNECT_ATTEMPTS) {
 					mBoldCounter = 0;
-					TeclaApp.getInstance().releaseWakeLock();
+					Helper.releaseWakeLock();
 					mIsBold = false;
 				}
 			}
@@ -234,11 +248,11 @@ public class SwitchEventProvider extends Service implements Runnable {
 					gotStreams = true;
 				} catch (IOException e) {
 					e.printStackTrace();
-					Log.e(TeclaApp.TAG, CLASS_TAG + "Error getting streams: " + e.getMessage());
+					Log.e(SwitchEventProvider.TAG, CLASS_TAG + "Error getting streams: " + e.getMessage());
 				}
 
 				if (gotStreams) {
-					TeclaApp.getInstance().wakeUnlockScreen();
+					Helper.wakeUnlockScreen();
 					showNotification();
 
 					mPingCounter = 0;
@@ -249,8 +263,8 @@ public class SwitchEventProvider extends Service implements Runnable {
 					while(mIsBroadcasting) {
 						try {
 							inByte = mInStream.read();
-							if (TeclaApp.DEBUG) Log.v(TeclaApp.TAG, CLASS_TAG + "Byte received: " +
-									TeclaApp.getInstance().byte2Hex(inByte) + " at " + SystemClock.uptimeMillis());
+							if (SwitchEventProvider.DEBUG) Log.v(SwitchEventProvider.TAG, CLASS_TAG + "Byte received: " +
+									Helper.byte2Hex(inByte) + " at " + SystemClock.uptimeMillis());
 							if (inByte != 0xffffffff) { // Work-around for Samsung Galaxy 
 								if (inByte == STATE_PING) {
 									mPingCounter--;
@@ -262,30 +276,30 @@ public class SwitchEventProvider extends Service implements Runnable {
 								}
 							}
 						} catch (IOException e) {
-							Log.e(TeclaApp.TAG, CLASS_TAG + "BroadcastingLoop: " + e.getMessage());
+							Log.e(SwitchEventProvider.TAG, CLASS_TAG + "BroadcastingLoop: " + e.getMessage());
 							mIsBroadcasting = false;
 							e.printStackTrace();
 						}
 					}
 					broadcastShieldDisconnected();
 					cancelNotification();
-					Log.w(TeclaApp.TAG, CLASS_TAG + "Disconnected from Tecla Shield");
-					TeclaApp.getInstance().wakeUnlockScreen();
+					Log.w(SwitchEventProvider.TAG, CLASS_TAG + "Disconnected from Tecla Shield");
+					Helper.wakeUnlockScreen();
 					//Need to toast on a separate thread!
 					mHandler.post(new Runnable () {
 						public void run() {
-							TeclaApp.getInstance().showToast(R.string.shield_disconnected);
+							Helper.showToast(R.string.shield_disconnected,context);
 						}
 					});
 				}
 			}
 			if (mKeepReconnecting) {
 				long delay = SHIELD_RECONNECT_DELAY;
-				Log.i(TeclaApp.TAG, CLASS_TAG + "Connection will be attempted in " + delay + " miliseconds.");
+				Log.i(SwitchEventProvider.TAG, CLASS_TAG + "Connection will be attempted in " + delay + " miliseconds.");
 				try {
 					Thread.sleep(delay);
 				} catch (InterruptedException e) {
-					Log.e(TeclaApp.TAG, CLASS_TAG + e.getMessage());
+					Log.e(SwitchEventProvider.TAG, CLASS_TAG + e.getMessage());
 					e.printStackTrace();
 				}
 			}
@@ -295,8 +309,10 @@ public class SwitchEventProvider extends Service implements Runnable {
 	private Runnable mDebounceRunnable = new Runnable () {
 
 		public void run() {
-			if (TeclaApp.DEBUG) Log.d(TeclaApp.TAG, CLASS_TAG + "Filtered switch event received");
-			TeclaApp.getInstance().cancelFullReset();
+			if (SwitchEventProvider.DEBUG) Log.d(SwitchEventProvider.TAG, CLASS_TAG + "Filtered switch event received");
+			// FIXME: Solve dependency issues
+			//Helper.cancelFullReset(mFullResetRunnable);
+			
 			
 			int switchChanges = mPrevSwitchStates ^ mSwitchStates; // Sets bits of switch states that changed
 
@@ -311,11 +327,12 @@ public class SwitchEventProvider extends Service implements Runnable {
 			handleSwitchEvent(switchChanges, mSwitchStates);
 
 			if (mSwitchStates != STATE_DEFAULT) {
-				if(!TeclaApp.persistence.isMorseModeEnabled()) {
+				if(!persistence.isMorseModeEnabled()) {
 					//Disables sending a category.HOME intent when
 					//using Morse repeat-on-switch-down
-					long fullResetDelay=TeclaApp.persistence.getFullResetTimeout();
-					TeclaApp.getInstance().postDelayedFullReset(fullResetDelay);
+					long fullResetDelay=persistence.getFullResetTimeout();
+					// FIXME: Solve dependency issues
+					//Helper.postDelayedFullReset(fullResetDelay);
 				}
 			}
 			
@@ -327,19 +344,22 @@ public class SwitchEventProvider extends Service implements Runnable {
 		if (mPhoneRinging) {
 			//Screen should be on
 			//Answering should also unlock
-			TeclaApp.getInstance().answerCall();
+			
+			// FIXME: Solve dependency issues
+			//Helper.answerCall();
+			
 			// Assume phone is not ringing any more
 			mPhoneRinging = false;
-		} else if (!TeclaApp.persistence.isScreenOn()) {
+		} else if (!persistence.isScreenOn()) {
 			// Screen is off, so just wake it
-			TeclaApp.getInstance().wakeUnlockScreen();
+			Helper.wakeUnlockScreen();
 		} else {
 			// In all other instances acquire wake lock,
 			// WARNING: just poking user activity timer DOES NOT WORK on gingerbread
-			TeclaApp.getInstance().wakeUnlockScreen();
-			if (TeclaApp.DEBUG) Log.d(TeclaApp.TAG, CLASS_TAG + "Broadcasting switch event: " +
-					TeclaApp.getInstance().byte2Hex(switchChanges) + ":" +
-					TeclaApp.getInstance().byte2Hex(switchStates));
+			Helper.wakeUnlockScreen();
+			if (SwitchEventProvider.DEBUG) Log.d(SwitchEventProvider.TAG, CLASS_TAG + "Broadcasting switch event: " +
+					Helper.byte2Hex(switchChanges) + ":" +
+					Helper.byte2Hex(switchStates));
 			// Reset intent
 			mSwitchEventIntent.removeExtra(SwitchEvent.EXTRA_SWITCH_CHANGES);
 			mSwitchEventIntent.removeExtra(SwitchEvent.EXTRA_SWITCH_STATES);
@@ -356,14 +376,14 @@ public class SwitchEventProvider extends Service implements Runnable {
 			// Close socket if it still exists
 			try {
 				mBluetoothSocket.close();
-				if (TeclaApp.DEBUG) Log.d(TeclaApp.TAG, CLASS_TAG + "Socket closed");
+				if (SwitchEventProvider.DEBUG) Log.d(SwitchEventProvider.TAG, CLASS_TAG + "Socket closed");
 			} catch (IOException e) {
-				Log.e(TeclaApp.TAG, CLASS_TAG + "killSocket: " + e.getMessage());
+				Log.e(SwitchEventProvider.TAG, CLASS_TAG + "killSocket: " + e.getMessage());
 				e.printStackTrace();
 			}
 			mBluetoothSocket = null;
 		}
-		if (TeclaApp.DEBUG) Log.d(TeclaApp.TAG, CLASS_TAG + "Socket killed");
+		if (SwitchEventProvider.DEBUG) Log.d(SwitchEventProvider.TAG, CLASS_TAG + "Socket killed");
 	}
 	
 	// All intents will be processed here
@@ -373,11 +393,11 @@ public class SwitchEventProvider extends Service implements Runnable {
 		public void onReceive(Context context, Intent intent) {
 
 			if (intent.getAction().equals(TelephonyManager.ACTION_PHONE_STATE_CHANGED)) {
-				if (TeclaApp.DEBUG) Log.d(TeclaApp.TAG, CLASS_TAG + "Phone state changed");
+				if (SwitchEventProvider.DEBUG) Log.d(SwitchEventProvider.TAG, CLASS_TAG + "Phone state changed");
 				mPhoneRinging = false;
 				TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
 				if (tm.getCallState() == TelephonyManager.CALL_STATE_RINGING) {
-					if (TeclaApp.DEBUG) Log.d(TeclaApp.TAG, CLASS_TAG + "Phone ringing");
+					if (SwitchEventProvider.DEBUG) Log.d(SwitchEventProvider.TAG, CLASS_TAG + "Phone ringing");
 					mPhoneRinging = true;
 				}
 			}
@@ -393,7 +413,7 @@ public class SwitchEventProvider extends Service implements Runnable {
 		Boolean success = false;
 
 		if (mBluetoothAdapter != null && mBluetoothAdapter.isEnabled()) {
-			if (TeclaApp.DEBUG) Log.d(TeclaApp.TAG, CLASS_TAG + "Attempting to open socket to " + shieldAddress + "...");
+			if (SwitchEventProvider.DEBUG) Log.d(SwitchEventProvider.TAG, CLASS_TAG + "Attempting to open socket to " + shieldAddress + "...");
 
 			BluetoothDevice teclaShield;
 			teclaShield = mBluetoothAdapter.getRemoteDevice(shieldAddress);
@@ -401,11 +421,11 @@ public class SwitchEventProvider extends Service implements Runnable {
 			if (!success) {
 				killSocket();
 				// Try usual method
-				if (TeclaApp.DEBUG) Log.d(TeclaApp.TAG, CLASS_TAG + "Creating bluetooth serial socket...");
+				if (SwitchEventProvider.DEBUG) Log.d(SwitchEventProvider.TAG, CLASS_TAG + "Creating bluetooth serial socket...");
 				try {
 					mBluetoothSocket = teclaShield.createRfcommSocketToServiceRecord(SPP_UUID);
 				} catch (IOException e) {
-					Log.e(TeclaApp.TAG, CLASS_TAG + "openSocket: " + e.getMessage());
+					Log.e(SwitchEventProvider.TAG, CLASS_TAG + "openSocket: " + e.getMessage());
 					e.printStackTrace();
 				}
 				success = connectSocket();
@@ -423,41 +443,41 @@ public class SwitchEventProvider extends Service implements Runnable {
 					 */
 					success = createSocketWithReflection(teclaShield);
 				} else {
-					if (TeclaApp.DEBUG) Log.v(TeclaApp.TAG, CLASS_TAG + "Will not attempt to open bluetooth serial socket with reflection");
+					if (SwitchEventProvider.DEBUG) Log.v(SwitchEventProvider.TAG, CLASS_TAG + "Will not attempt to open bluetooth serial socket with reflection");
 				}
 			}
 			if (!success) {
 				killSocket(); //Still no success, kill socket
-				Log.i(TeclaApp.TAG, CLASS_TAG + "Could not open socket");
+				Log.i(SwitchEventProvider.TAG, CLASS_TAG + "Could not open socket");
 			}
 		} else {
-			Log.w(TeclaApp.TAG, CLASS_TAG + "Can't open socket. Bluetooth is disabled.");
+			Log.w(SwitchEventProvider.TAG, CLASS_TAG + "Can't open socket. Bluetooth is disabled.");
 		}
 		return success;
 	}
 
 	private boolean createSocketWithReflection(BluetoothDevice teclaShield) {
 		// Try using reflection
-		Log.w(TeclaApp.TAG, CLASS_TAG + "Creating bluetooth serial socket using reflection...");
+		Log.w(SwitchEventProvider.TAG, CLASS_TAG + "Creating bluetooth serial socket using reflection...");
 		killSocket();
 		Method m = null;
 		try {
 			m = teclaShield.getClass().getMethod("createRfcommSocket", new Class[] {int.class});
 			mBluetoothSocket = (BluetoothSocket) m.invoke(teclaShield, 1);
 		} catch (SecurityException e) {
-			Log.e(TeclaApp.TAG, CLASS_TAG + "openSocket with reflection: " + e.getMessage());
+			Log.e(SwitchEventProvider.TAG, CLASS_TAG + "openSocket with reflection: " + e.getMessage());
 			e.printStackTrace();
 		} catch (NoSuchMethodException e) {
-			Log.e(TeclaApp.TAG, CLASS_TAG + "openSocket with reflection: " + e.getMessage());
+			Log.e(SwitchEventProvider.TAG, CLASS_TAG + "openSocket with reflection: " + e.getMessage());
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
-			Log.e(TeclaApp.TAG, CLASS_TAG + "openSocket with reflection: " + e.getMessage());
+			Log.e(SwitchEventProvider.TAG, CLASS_TAG + "openSocket with reflection: " + e.getMessage());
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
-			Log.e(TeclaApp.TAG, CLASS_TAG + "openSocket with reflection: " + e.getMessage());
+			Log.e(SwitchEventProvider.TAG, CLASS_TAG + "openSocket with reflection: " + e.getMessage());
 			e.printStackTrace();
 		} catch (InvocationTargetException e) {
-			Log.e(TeclaApp.TAG, CLASS_TAG + "openSocket with reflection: " + e.getMessage());
+			Log.e(SwitchEventProvider.TAG, CLASS_TAG + "openSocket with reflection: " + e.getMessage());
 			e.printStackTrace();
 		}
 		return connectSocket();
@@ -469,10 +489,10 @@ public class SwitchEventProvider extends Service implements Runnable {
 			// for why the cancelDiscovery() call is necessary
 			mBluetoothAdapter.cancelDiscovery();
 			mBluetoothSocket.connect();
-			Log.d(TeclaApp.TAG, CLASS_TAG + "Connected to " + mBluetoothSocket.getRemoteDevice().getAddress());
+			Log.d(SwitchEventProvider.TAG, CLASS_TAG + "Connected to " + mBluetoothSocket.getRemoteDevice().getAddress());
 			return true;
 		} catch (IOException e) {
-			Log.e(TeclaApp.TAG, CLASS_TAG + "connectSocket: " + e.getMessage());
+			Log.e(SwitchEventProvider.TAG, CLASS_TAG + "connectSocket: " + e.getMessage());
 			e.printStackTrace();
 		}
 		return false;
@@ -488,7 +508,7 @@ public class SwitchEventProvider extends Service implements Runnable {
 		public void run() {
 			mPingCounter++;
 			if (mPingCounter > PING_TIMEOUT_COUNTER) {
-				Log.e(TeclaApp.TAG, CLASS_TAG + "Shield connection timed out!");
+				Log.e(SwitchEventProvider.TAG, CLASS_TAG + "Shield connection timed out!");
 				killSocket();
 			} else {
 				writeToShield(STATE_PING);
@@ -502,7 +522,7 @@ public class SwitchEventProvider extends Service implements Runnable {
 		try {
 			mOutStream.write(mByte);
 		} catch (IOException e) {
-			Log.e(TeclaApp.TAG, CLASS_TAG + "writeToShield: " + e.getMessage());
+			Log.e(SwitchEventProvider.TAG, CLASS_TAG + "writeToShield: " + e.getMessage());
 			killSocket();
 			e.printStackTrace();
 		}
@@ -520,12 +540,14 @@ public class SwitchEventProvider extends Service implements Runnable {
 				System.currentTimeMillis());
 
 		// The PendingIntent to launch our activity if the user selects this notification
-		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-				new Intent(this, TeclaPrefs.class), 0);
+		
+		// FIXME: Solve dependency issues
+		//PendingIntent contentIntent = PendingIntent.getActivity(this, 0,new Intent(this, TeclaPrefs.class), 0);
 
 		// Set the info for the views that show in the notification panel.
-		notification.setLatestEventInfo(this, getText(R.string.sep_label),
-				text, contentIntent);
+		
+		// FIXME: Solve dependency issues
+		//notification.setLatestEventInfo(this, getText(R.string.sep_label),text, contentIntent);
 
 		// Add sound and type.
 		notification.defaults |= Notification.DEFAULT_SOUND;
@@ -534,16 +556,16 @@ public class SwitchEventProvider extends Service implements Runnable {
 
 		// Send the notification.
 		// We use a layout id because it is a unique number.  We use it later to cancel.
-		mNotificationManager.notify(R.string.shield_connected, notification);
+		//mNotificationManager.notify(R.string.shield_connected, notification);
 	}
 
 	private void broadcastShieldConnected() {
-		if (TeclaApp.DEBUG) Log.d(TeclaApp.TAG, CLASS_TAG + "Broadcasting Shield connected intent...");
+		if (SwitchEventProvider.DEBUG) Log.d(SwitchEventProvider.TAG, CLASS_TAG + "Broadcasting Shield connected intent...");
 		sendBroadcast(new Intent(ACTION_SHIELD_CONNECTED));
 	}
 
 	private void broadcastShieldDisconnected() {
-		if (TeclaApp.DEBUG) Log.d(TeclaApp.TAG, CLASS_TAG + "Broadcasting Shield disconnected intent...");
+		if (SwitchEventProvider.DEBUG) Log.d(SwitchEventProvider.TAG, CLASS_TAG + "Broadcasting Shield disconnected intent...");
 		sendBroadcast(new Intent(ACTION_SHIELD_DISCONNECTED));
 	}
 
@@ -552,6 +574,18 @@ public class SwitchEventProvider extends Service implements Runnable {
 		mNotificationManager.cancel(R.string.shield_connected);
 	}
 
+	public Runnable mFullResetRunnable = new Runnable () {
+
+		public void run() {
+			Intent home = new Intent(Intent.ACTION_MAIN);
+			home.addCategory(Intent.CATEGORY_HOME);
+			home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			startActivity(home);
+		}
+
+	};
+	
+	
 	@Override
 	public IBinder onBind(Intent arg0) {
 		return null;

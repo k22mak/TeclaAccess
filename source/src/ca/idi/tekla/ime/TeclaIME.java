@@ -62,12 +62,13 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.PopupWindow;
 import ca.idi.tecla.framework.SepManager;
 import ca.idi.tecla.framework.SwitchEvent;
+import ca.idi.tecla.framework.util.Persistence;
+import ca.idi.tecla.framework.util.Helper;
+import ca.idi.tecla.framework.SwitchEventProvider;
 import ca.idi.tekla.R;
 import ca.idi.tekla.TeclaApp;
 import ca.idi.tekla.TeclaPrefs;
-import ca.idi.tekla.sep.SwitchEventProvider;
 import ca.idi.tekla.util.Highlighter;
-import ca.idi.tekla.util.Persistence;
 import ca.idi.tekla.util.TeclaDesktopClient;
 
 /**
@@ -2036,11 +2037,11 @@ public class TeclaIME extends InputMethodService
 			}
 			
 			if (TeclaApp.DEBUG) Log.d(TeclaApp.TAG, CLASS_TAG + "Switch event received: " +
-					TeclaApp.getInstance().byte2Hex(switchEvent.getSwitchChanges()) + ":" +
-					TeclaApp.getInstance().byte2Hex(switchEvent.getSwitchStates()));
+					Helper.byte2Hex(switchEvent.getSwitchChanges()) + ":" +
+					Helper.byte2Hex(switchEvent.getSwitchStates()));
 			
 			if (TeclaApp.DEBUG) Log.d(TeclaApp.TAG, CLASS_TAG + "Byte handled: " +
-					TeclaApp.getInstance().byte2Hex(switchEvent.getSwitchStates()) + " at " + SystemClock.uptimeMillis());
+					Helper.byte2Hex(switchEvent.getSwitchStates()) + " at " + SystemClock.uptimeMillis());
 		}
 		
 		evaluateNavKbdTimeout();		
@@ -2279,7 +2280,7 @@ public class TeclaIME extends InputMethodService
 				mSwitchPopup.setWidth(display.getWidth());
 				mSwitchPopup.setHeight(display.getHeight());
 				mSwitchPopup.showAtLocation(mIMEView, Gravity.NO_GRAVITY, 0, 0);
-				TeclaApp.getInstance().showToast(R.string.fullscreen_enabled);
+				Helper.showToast(R.string.fullscreen_enabled,TeclaApp.getInstance());
 				if (TeclaApp.DEBUG) Log.d(TeclaApp.TAG, CLASS_TAG + "Fullscreen switch shown");
 				evaluateStartScanning();
 			} else {
@@ -2358,7 +2359,7 @@ public class TeclaIME extends InputMethodService
 			mSwitchPopup.dismiss();
 		}
 		evaluateStartScanning();
-		TeclaApp.getInstance().showToast(R.string.fullscreen_disabled);
+		Helper.showToast(R.string.fullscreen_disabled,TeclaApp.getInstance());
 	}
 	
 	private boolean isFullScreenShowing() {

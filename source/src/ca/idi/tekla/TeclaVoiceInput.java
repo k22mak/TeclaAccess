@@ -25,6 +25,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.AdapterView.OnItemClickListener;
+import ca.idi.tecla.framework.util.Helper;
 
 public class TeclaVoiceInput extends Activity {
 
@@ -109,7 +110,7 @@ public class TeclaVoiceInput extends Activity {
 				Log.e(TeclaApp.TAG, "Voice input not supported");
 			}
 		} else {
-            TeclaApp.getInstance().showToast(R.string.no_voice_input_available);
+            Helper.showToast(R.string.no_voice_input_available,TeclaApp.getInstance());
             finish();
 		}
 		

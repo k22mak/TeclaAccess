@@ -18,6 +18,7 @@ import android.view.WindowManager;
 import android.view.View.OnFocusChangeListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
+import ca.idi.tecla.framework.util.Helper;
 
 public class TeclaSplash extends Activity
 		implements OnFocusChangeListener {
@@ -43,7 +44,7 @@ public class TeclaSplash extends Activity
 		setContentView(R.layout.activity_splash);
 		mSplashText = (TextView) findViewById(R.id.splash_text);
 
-		TeclaApp.getInstance().wakeUnlockScreen();
+		Helper.wakeUnlockScreen();
 		TeclaApp.persistence.setScreenOn();
 
 		synchronized(TeclaApp.getInstance()) {

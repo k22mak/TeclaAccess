@@ -4,6 +4,7 @@
 
 package ca.idi.tekla.util;
 
+import ca.idi.tecla.framework.util.Persistence;
 import ca.idi.tekla.R;
 import ca.idi.tekla.TeclaApp;
 import android.app.Dialog;

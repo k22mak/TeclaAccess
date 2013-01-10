@@ -2,7 +2,7 @@
  * Copyright (C) 2010-2011, Inclusive Design Research Centre
  */
 
-package ca.idi.tekla.util;
+package ca.idi.tecla.framework.util;
 
 import java.util.HashMap;
 
@@ -10,6 +10,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 public class Persistence {
 	

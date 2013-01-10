@@ -24,19 +24,20 @@ import java.util.HashMap;
 import ca.idi.tecla.lib.InputAccess;
 import ca.idi.tecla.lib.ListPreference;
 import ca.idi.tecla.framework.SepManager;
+import ca.idi.tecla.framework.util.Persistence;
+import ca.idi.tecla.framework.SwitchEventProvider;
 import ca.idi.tekla.R;
 import ca.idi.tekla.ime.TeclaIME;
 import ca.idi.tekla.ime.TeclaKeyboardView;
-import ca.idi.tekla.sep.SwitchEventProvider;
 import ca.idi.tekla.util.DefaultActionsDialog;
 import ca.idi.tekla.util.FullResetTimeoutDialog;
 import ca.idi.tekla.util.MorseTimeUnitDialog;
 import ca.idi.tekla.util.NavKbdTimeoutDialog;
-import ca.idi.tekla.util.Persistence;
 import ca.idi.tekla.util.RepeatFrequencyDialog;
 import ca.idi.tekla.util.ScanSpeedDialog;
 import ca.idi.tekla.util.SwitchPreference;
 import ca.idi.tekla.util.TeclaDesktopClient;
+import ca.idi.tecla.framework.util.Helper;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -409,12 +410,12 @@ implements SharedPreferences.OnSharedPreferenceChangeListener{
 					if(!SepManager.start(TeclaPrefs.this, mShieldAddress)) {
 						// Could not connect to Shield
 						dismissDialog();
-						TeclaApp.getInstance().showToast(R.string.couldnt_connect_shield);
+						Helper.showToast(R.string.couldnt_connect_shield,TeclaApp.getInstance());
 					}
 				} else {
 					// Shield not found
 					dismissDialog();
-					if (!mConnectionCancelled) TeclaApp.getInstance().showToast(R.string.no_shields_inrange);
+					if (!mConnectionCancelled) Helper.showToast(R.string.no_shields_inrange,TeclaApp.getInstance());
 					mPrefConnectToShield.setChecked(false);
 					mPrefTempDisconnect.setChecked(false);
 					mPrefTempDisconnect.setEnabled(false);
@@ -424,7 +425,7 @@ implements SharedPreferences.OnSharedPreferenceChangeListener{
 			if (intent.getAction().equals(SwitchEventProvider.ACTION_SHIELD_CONNECTED)) {
 				if (TeclaApp.DEBUG) Log.d(TeclaApp.TAG, CLASS_TAG + "Successfully started SEP");
 				dismissDialog();
-				TeclaApp.getInstance().showToast(R.string.shield_connected);
+				Helper.showToast(R.string.shield_connected, TeclaApp.getInstance());
 				mPrefTempDisconnect.setEnabled(true);
 				mPrefMorse.setEnabled(true);
 				mPrefPersistentKeyboard.setChecked(true);
@@ -490,7 +491,7 @@ implements SharedPreferences.OnSharedPreferenceChangeListener{
 				mPrefMorseHUD.setEnabled(true);
 				mPrefMorseKeyMode.setEnabled(true);
 				TeclaApp.getInstance().enabledMorseIME();
-				TeclaApp.getInstance().showToast(R.string.morse_enabled);
+				Helper.showToast(R.string.morse_enabled,TeclaApp.getInstance());
 			}
 			else {
 				TeclaApp.getInstance().disabledMorseIME();
@@ -711,7 +712,7 @@ implements SharedPreferences.OnSharedPreferenceChangeListener{
 			public void onCancel(DialogInterface arg0) {
 				cancelDiscovery();
 				if (TeclaApp.DEBUG) Log.d(TeclaApp.TAG, CLASS_TAG + "Tecla Shield discovery cancelled");
-				TeclaApp.getInstance().showToast(R.string.shield_connection_cancelled);
+				Helper.showToast(R.string.shield_connection_cancelled,TeclaApp.getInstance());
 				mConnectionCancelled = true;
 				mPrefTempDisconnect.setChecked(false);
 				mPrefTempDisconnect.setEnabled(false);

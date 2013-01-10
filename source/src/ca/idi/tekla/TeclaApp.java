@@ -26,14 +26,16 @@ import android.os.PowerManager.WakeLock;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.provider.SyncStateContract.Helpers;
 import android.speech.RecognizerIntent;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.widget.Toast;
+import ca.idi.tecla.framework.util.Persistence;
 import ca.idi.tecla.lib.InputAccess;
 import ca.idi.tekla.util.Highlighter;
-import ca.idi.tekla.util.Persistence;
 import ca.idi.tekla.util.TeclaDesktopClient;
+import ca.idi.tecla.framework.util.Helper;
 
 public class TeclaApp extends ca.idi.tecla.framework.TeclaApp {
 
@@ -62,15 +64,12 @@ public class TeclaApp extends ca.idi.tecla.framework.TeclaApp {
 	public static final String ACTION_INPUT_STRING = "ca.idi.tekla.ime.action.INPUT_STRING";
 	public static final String EXTRA_INPUT_STRING = "ca.idi.tekla.sep.extra.INPUT_STRING";
 	private static final long BOOT_TIMEOUT = 60000;
-	private static final int WAKE_LOCK_TIMEOUT = 5000;
 	
-	private PowerManager mPowerManager;
-	private KeyguardManager mKeyguardManager;
-	private KeyguardLock mKeyguardLock;
-	private WakeLock mWakeLock;
+	
+	
 	private AudioManager mAudioManager;
 	private PackageManager mPackageManager;
-	private Handler mHandler;
+	private static Handler mHandler;
 
 	/** Record whether we've broadcast an ACTION_IME_CREATED Intent,
 	 * so that any client creating a BroadcastReceiver after this
@@ -109,12 +108,8 @@ public class TeclaApp extends ca.idi.tecla.framework.TeclaApp {
 		highlighter = new Highlighter(this);
 		
 		
-
-		mPowerManager = (PowerManager) getSystemService(POWER_SERVICE);
-		mWakeLock = mPowerManager.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP | PowerManager.FULL_WAKE_LOCK |
-				PowerManager.ON_AFTER_RELEASE, TeclaApp.TAG);
-		mKeyguardManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
-		mKeyguardLock = mKeyguardManager.newKeyguardLock(TeclaApp.TAG);
+		Helper.initPowerManager(this,POWER_SERVICE,KEYGUARD_SERVICE);
+		
 		mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		mPackageManager = getPackageManager();
 		
@@ -147,8 +142,8 @@ public class TeclaApp extends ca.idi.tecla.framework.TeclaApp {
 	@Override
 	public void onTerminate() {
 		unregisterReceiver(mReceiver);
-		releaseWakeLock();
-		releaseKeyguardLock();
+		Helper.releaseWakeLock();
+		Helper.releaseKeyguardLock();
 		Log.d(TAG, "TECLA APP TERMINATED!");
 		super.onTerminate();
 	}
@@ -162,7 +157,7 @@ public class TeclaApp extends ca.idi.tecla.framework.TeclaApp {
 			if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
 				if (TeclaApp.DEBUG) Log.d(TeclaApp.TAG, "Screen off");
 				persistence.setScreenOff();
-				releaseKeyguardLock();
+				Helper.releaseKeyguardLock();
 			}
 			if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
 				if (TeclaApp.DEBUG) Log.d(TeclaApp.TAG, "Screen on");
@@ -263,25 +258,8 @@ public class TeclaApp extends ca.idi.tecla.framework.TeclaApp {
 		sendBroadcast(intent);
 	}
 	
-	public void postDelayedFullReset(long delay) {
-		cancelFullReset();
-		mHandler.postDelayed(mFullResetRunnable, delay * 1000);
-	}
-	
-	public void cancelFullReset() {
-		mHandler.removeCallbacks(mFullResetRunnable);
-	}
-	
-	private Runnable mFullResetRunnable = new Runnable () {
 
-		public void run() {
-			Intent home = new Intent(Intent.ACTION_MAIN);
-			home.addCategory(Intent.CATEGORY_HOME);
-			home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			startActivity(home);
-		}
 
-	};
 
 	public void candidatesAvailable() {
 		//TODO: Sends list of candidates to IME for user selection
@@ -373,7 +351,7 @@ public class TeclaApp extends ca.idi.tecla.framework.TeclaApp {
 				startActivity(intent);
 			} catch (ActivityNotFoundException e2) {
 				Log.e(TeclaApp.TAG, "Quick Search Box not available");
-				TeclaApp.getInstance().showToast(R.string.no_voice_actions_installed);
+				Helper.showToast(R.string.no_voice_actions_installed,TeclaApp.getInstance());
 			}
 		}
 	}
@@ -420,54 +398,8 @@ public class TeclaApp extends ca.idi.tecla.framework.TeclaApp {
 		mAudioManager.setSpeakerphoneOn(false);
 	}
 
-	public void holdKeyguardLock() {
-		if (TeclaApp.DEBUG) Log.d(TeclaApp.TAG, "Acquiring keyguard lock...");
-		mKeyguardLock.disableKeyguard();
-	}
-	
-	public void releaseKeyguardLock() {
-		if (DEBUG) Log.d(TeclaApp.TAG, "Releasing keyguard lock...");
-		mKeyguardLock.reenableKeyguard();
-	}
-	
-	/**
-	 * Hold wake lock until releaseWakeLock() is called.
-	 */
-	public void holdWakeLock() {
-		holdWakeLock(0);
-	}
-	
-	/**
-	 * Hold wake lock for the number of seconds specified by length
-	 * @param length the number of seconds to hold the wake lock for
-	 */
-	public void holdWakeLock(long length) {
-		if (length > 0) {
-			if (DEBUG) Log.d(TeclaApp.TAG, "Aquiring temporal wake lock...");
-			mWakeLock.acquire(length);
-		} else {
-			if (DEBUG) Log.d(TeclaApp.TAG, "Aquiring wake lock...");
-			mWakeLock.acquire();
-		}
-		pokeUserActivityTimer();
-	}
 
-	public void releaseWakeLock () {
-		if (DEBUG) Log.d(TeclaApp.TAG, "Releasing wake lock...");
-		mWakeLock.release();
-	}
 	
-	/**
-	 * Wakes and unlocks the screen for a minimum of {@link WAKE_LOCK_TIMEOUT} miliseconds
-	 */
-	public void wakeUnlockScreen() {
-		holdKeyguardLock();
-		holdWakeLock(WAKE_LOCK_TIMEOUT);
-	}
-
-	public void pokeUserActivityTimer () {
-		mPowerManager.userActivity(SystemClock.uptimeMillis(), true);
-	}
 
 	public Boolean isDefaultIME() {
 		String ime_id = Settings.Secure.getString(getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);
@@ -475,16 +407,4 @@ public class TeclaApp extends ca.idi.tecla.framework.TeclaApp {
 		return false;
 	}
 
-	public String byte2Hex(int bite) {
-		return String.format("0x%02x", bite);
-	}
-	
-	public void showToast(String msg) {
-		Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
-	}
-
-	public void showToast(int resid) {
-		Toast.makeText(this, resid, Toast.LENGTH_LONG).show();
-	}	
-	
 }

@@ -1,3 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+        <string name="shield_connected">Tecla Shield Connected</string>
+        <string name="shield_disconnected">Tecla Shield disconnected</string>
+        
+		<!-- Tecla: Titles and labels -->
+    	<string name="sep_label">Tecla Shield Status</string>
+        
 </resources>

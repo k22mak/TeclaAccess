@@ -46,7 +46,7 @@ public class TeclaApp extends ca.idi.tecla.framework.TeclaApp {
 	/**
 	 * Main debug switch, turns on/off debugging for the whole app
 	 */
-	public static final boolean DEBUG = false	;
+	public static final boolean DEBUG = true	;
 
 	public static final String TECLA_IME_ID = "ca.idi.tekla/.ime.TeclaIME";
 

@@ -65,7 +65,7 @@
                 android:resource="@xml/method" />
         </service>
         <service
-            android:name="ca.idi.tecla.framework.util.SwitchEventProvider"
+            android:name="ca.idi.tecla.framework.SwitchEventProvider"
             android:enabled="true" >
             <intent-filter>
                 <action android:name="ca.idi.tekla.SEP_SERVICE" />

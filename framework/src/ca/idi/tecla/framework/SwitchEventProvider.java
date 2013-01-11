@@ -311,7 +311,7 @@ public class SwitchEventProvider extends Service implements Runnable {
 		public void run() {
 			if (SwitchEventProvider.DEBUG) Log.d(SwitchEventProvider.TAG, CLASS_TAG + "Filtered switch event received");
 			// FIXME: Solve dependency issues
-			//Helper.cancelFullReset(mFullResetRunnable);
+			cancelFullReset();
 			
 			
 			int switchChanges = mPrevSwitchStates ^ mSwitchStates; // Sets bits of switch states that changed
@@ -332,7 +332,7 @@ public class SwitchEventProvider extends Service implements Runnable {
 					//using Morse repeat-on-switch-down
 					long fullResetDelay=persistence.getFullResetTimeout();
 					// FIXME: Solve dependency issues
-					//Helper.postDelayedFullReset(fullResetDelay);
+					//postDelayedFullReset(fullResetDelay);
 				}
 			}
 			
@@ -585,6 +585,13 @@ public class SwitchEventProvider extends Service implements Runnable {
 
 	};
 	
+	public void postDelayedFullReset(long delay) {
+		cancelFullReset();
+		mHandler.postDelayed(mFullResetRunnable, delay * 1000);
+	}
+	public void cancelFullReset() {
+		mHandler.removeCallbacks(mFullResetRunnable);
+	}
 	
 	@Override
 	public IBinder onBind(Intent arg0) {

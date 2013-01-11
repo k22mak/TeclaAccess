@@ -760,9 +760,15 @@ implements SharedPreferences.OnSharedPreferenceChangeListener{
 	 * Stops the SEP if it is running
 	 */
 	private void stopSEP() {
-		if (SepManager.isRunning(getApplicationContext())) {
+		
+		SepManager.stop(getApplicationContext());
+		// FIXME: Does not find BT connections
+		/*
+		if (SepManager.isRunning(getApplicationContext())) {		
 			SepManager.stop(getApplicationContext());
 		}
+		*/
+		
 	}
 	
 	private void cancelDiscovery() {

@@ -31,6 +31,7 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.KeyEvent;
 
 public class SwitchEventProvider extends Service implements Runnable {
 	
@@ -310,7 +311,6 @@ public class SwitchEventProvider extends Service implements Runnable {
 
 		public void run() {
 			if (SwitchEventProvider.DEBUG) Log.d(SwitchEventProvider.TAG, CLASS_TAG + "Filtered switch event received");
-			// FIXME: Solve dependency issues
 			cancelFullReset();
 			
 			
@@ -331,8 +331,7 @@ public class SwitchEventProvider extends Service implements Runnable {
 					//Disables sending a category.HOME intent when
 					//using Morse repeat-on-switch-down
 					long fullResetDelay=persistence.getFullResetTimeout();
-					// FIXME: Solve dependency issues
-					//postDelayedFullReset(fullResetDelay);
+					postDelayedFullReset(fullResetDelay);
 				}
 			}
 			
@@ -345,8 +344,7 @@ public class SwitchEventProvider extends Service implements Runnable {
 			//Screen should be on
 			//Answering should also unlock
 			
-			// FIXME: Solve dependency issues
-			//Helper.answerCall();
+			answerCall();
 			
 			// Assume phone is not ringing any more
 			mPhoneRinging = false;
@@ -540,14 +538,10 @@ public class SwitchEventProvider extends Service implements Runnable {
 				System.currentTimeMillis());
 
 		// The PendingIntent to launch our activity if the user selects this notification
-		
-		// FIXME: Solve dependency issues
-		//PendingIntent contentIntent = PendingIntent.getActivity(this, 0,new Intent(this, TeclaPrefs.class), 0);
+		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,new Intent(), 0);
 
 		// Set the info for the views that show in the notification panel.
-		
-		// FIXME: Solve dependency issues
-		//notification.setLatestEventInfo(this, getText(R.string.sep_label),text, contentIntent);
+		notification.setLatestEventInfo(this, getText(R.string.sep_label),text, contentIntent);
 
 		// Add sound and type.
 		notification.defaults |= Notification.DEFAULT_SOUND;
@@ -556,7 +550,7 @@ public class SwitchEventProvider extends Service implements Runnable {
 
 		// Send the notification.
 		// We use a layout id because it is a unique number.  We use it later to cancel.
-		//mNotificationManager.notify(R.string.shield_connected, notification);
+		mNotificationManager.notify(R.string.shield_connected, notification);
 	}
 
 	private void broadcastShieldConnected() {
@@ -589,8 +583,24 @@ public class SwitchEventProvider extends Service implements Runnable {
 		cancelFullReset();
 		mHandler.postDelayed(mFullResetRunnable, delay * 1000);
 	}
+	
 	public void cancelFullReset() {
 		mHandler.removeCallbacks(mFullResetRunnable);
+	}
+	
+	public void answerCall() {
+		// Simulate a press of the headset button to pick up the call
+		Intent buttonDown = new Intent(Intent.ACTION_MEDIA_BUTTON);             
+		buttonDown.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HEADSETHOOK));
+		sendOrderedBroadcast(buttonDown, "android.permission.CALL_PRIVILEGED");
+		
+		// froyo and beyond trigger on buttonUp instead of buttonDown
+		Intent buttonUp = new Intent(Intent.ACTION_MEDIA_BUTTON);               
+		buttonUp.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_HEADSETHOOK));
+		sendOrderedBroadcast(buttonUp, "android.permission.CALL_PRIVILEGED");
+		
+		persistence.isSpeakerphoneEnabled();
+		Helper.useSpeakerphone();
 	}
 	
 	@Override

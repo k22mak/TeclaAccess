@@ -6,33 +6,22 @@ package ca.idi.tekla;
 
 import java.util.ArrayList;
 
-import android.app.AlertDialog;
-import android.app.KeyguardManager;
-import android.app.KeyguardManager.KeyguardLock;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
-import android.os.Build;
 import android.os.Handler;
-import android.os.PowerManager;
-import android.os.PowerManager.WakeLock;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
-import android.provider.SyncStateContract.Helpers;
 import android.speech.RecognizerIntent;
 import android.util.Log;
-import android.view.KeyEvent;
-import android.widget.Toast;
 import ca.idi.tecla.framework.util.Persistence;
-import ca.idi.tecla.lib.InputAccess;
 import ca.idi.tekla.util.Highlighter;
 import ca.idi.tekla.util.TeclaDesktopClient;
 import ca.idi.tecla.framework.util.Helper;
@@ -67,7 +56,7 @@ public class TeclaApp extends ca.idi.tecla.framework.TeclaApp {
 	
 	
 	
-	private AudioManager mAudioManager;
+	//private AudioManager mAudioManager;
 	private PackageManager mPackageManager;
 	private static Handler mHandler;
 
@@ -108,9 +97,9 @@ public class TeclaApp extends ca.idi.tecla.framework.TeclaApp {
 		highlighter = new Highlighter(this);
 		
 		
-		Helper.initPowerManager(this,POWER_SERVICE,KEYGUARD_SERVICE);
+		Helper.initManagers(this,POWER_SERVICE,KEYGUARD_SERVICE,AUDIO_SERVICE);
 		
-		mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+		//mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		mPackageManager = getPackageManager();
 		
 		mHandler = new Handler();
@@ -373,6 +362,7 @@ public class TeclaApp extends ca.idi.tecla.framework.TeclaApp {
 		return mIMECreated;
 	}
 
+	/*
 	public void answerCall() {
 		// Simulate a press of the headset button to pick up the call
 		Intent buttonDown = new Intent(Intent.ACTION_MEDIA_BUTTON);             
@@ -387,6 +377,7 @@ public class TeclaApp extends ca.idi.tecla.framework.TeclaApp {
 		TeclaApp.persistence.isSpeakerphoneEnabled();
 		useSpeakerphone();
 	}
+	
 
 	public void useSpeakerphone() {
 		mAudioManager.setMode(AudioManager.MODE_IN_CALL);
@@ -397,7 +388,7 @@ public class TeclaApp extends ca.idi.tecla.framework.TeclaApp {
 		mAudioManager.setMode(AudioManager.MODE_NORMAL);
 		mAudioManager.setSpeakerphoneOn(false);
 	}
-
+	*/
 
 	
 

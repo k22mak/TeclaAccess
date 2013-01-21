@@ -125,7 +125,7 @@ public class SwitchEventProvider extends Service implements Runnable {
 		//if (SwitchEventProvider.DEBUG) android.os.Debug.waitForDebugger();
 		if (SwitchEventProvider.DEBUG) Log.d(SwitchEventProvider.TAG, CLASS_TAG + "Creating SEP...");
 		
-		persistence = new Persistence(this);
+		persistence = TeclaApp.getPersistence();
 		
 		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 

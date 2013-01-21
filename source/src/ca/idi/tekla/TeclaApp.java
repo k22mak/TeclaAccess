@@ -93,7 +93,7 @@ public class TeclaApp extends ca.idi.tecla.framework.TeclaApp {
 	private void init() {
 
 		instance = this;
-		persistence = new Persistence(this);
+		persistence = ca.idi.tecla.framework.TeclaApp.getPersistence();
 		highlighter = new Highlighter(this);
 		
 		
@@ -361,36 +361,6 @@ public class TeclaApp extends ca.idi.tecla.framework.TeclaApp {
 	public boolean isIMECreated() {
 		return mIMECreated;
 	}
-
-	/*
-	public void answerCall() {
-		// Simulate a press of the headset button to pick up the call
-		Intent buttonDown = new Intent(Intent.ACTION_MEDIA_BUTTON);             
-		buttonDown.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HEADSETHOOK));
-		sendOrderedBroadcast(buttonDown, "android.permission.CALL_PRIVILEGED");
-		
-		// froyo and beyond trigger on buttonUp instead of buttonDown
-		Intent buttonUp = new Intent(Intent.ACTION_MEDIA_BUTTON);               
-		buttonUp.putExtra(Intent.EXTRA_KEY_EVENT, new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_HEADSETHOOK));
-		sendOrderedBroadcast(buttonUp, "android.permission.CALL_PRIVILEGED");
-		
-		TeclaApp.persistence.isSpeakerphoneEnabled();
-		useSpeakerphone();
-	}
-	
-
-	public void useSpeakerphone() {
-		mAudioManager.setMode(AudioManager.MODE_IN_CALL);
-		mAudioManager.setSpeakerphoneOn(true);
-	}
-	
-	public void stopUsingSpeakerPhone() {
-		mAudioManager.setMode(AudioManager.MODE_NORMAL);
-		mAudioManager.setSpeakerphoneOn(false);
-	}
-	*/
-
-	
 
 	public Boolean isDefaultIME() {
 		String ime_id = Settings.Secure.getString(getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD);

@@ -1,5 +1,6 @@
 package ca.idi.tecla.framework;
 
+import ca.idi.tecla.framework.util.Persistence;
 import android.annotation.TargetApi;
 import android.app.Application;
 import android.content.BroadcastReceiver;
@@ -11,7 +12,7 @@ import android.os.PowerManager;
 
 public class TeclaApp extends Application
 {
-
+	private static Persistence persistence;
 	private PowerManager power_manager;
 	private Boolean screen_on;
 
@@ -38,6 +39,8 @@ public class TeclaApp extends Application
 		//Intents & Intent Filters
 		registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_SCREEN_OFF));
 		registerReceiver(mReceiver, new IntentFilter(Intent.ACTION_SCREEN_ON));
+		
+		persistence = new Persistence(this);
 		
 		TeclaStatic.startTeclaService(this);
 	}
@@ -67,6 +70,10 @@ public class TeclaApp extends Application
 		}
 
 	};
+	
+	public static Persistence getPersistence(){
+		return persistence;
+	}
 	
 	@TargetApi(Build.VERSION_CODES.ECLAIR_MR1)
 	private Boolean getScreenState() {

@@ -12,20 +12,6 @@ import android.os.PowerManager;
 
 public class TeclaApp extends Application
 {
-	
-	//Constants
-
-	/**
-	 * Tag used for logging in the whole framework
-	 */
-	public static final String TAG = "TeclaFramework";
-	
-	/**
-	 * Main debug switch, turns on/off debugging for the whole app
-	 */
-	public static final boolean DEBUG = true	;
-
-	
 	private static Persistence persistence;
 	private PowerManager power_manager;
 	private Boolean screen_on;

@@ -1,6 +1,6 @@
 package ca.idi.tecla.framework.util;
 
-import ca.idi.tecla.framework.SwitchEventProvider;
+import ca.idi.tecla.framework.TeclaApp;
 import android.app.KeyguardManager;
 import android.app.KeyguardManager.KeyguardLock;
 import android.content.Context;
@@ -29,11 +29,11 @@ public class Helper {
 				PowerManager.ACQUIRE_CAUSES_WAKEUP
 						| PowerManager.FULL_WAKE_LOCK
 						| PowerManager.ON_AFTER_RELEASE,
-				SwitchEventProvider.TAG);
+				TeclaApp.TAG);
 		mKeyguardManager = (KeyguardManager) context
 				.getSystemService(keyguardService);
 		mKeyguardLock = mKeyguardManager
-				.newKeyguardLock(SwitchEventProvider.TAG);
+				.newKeyguardLock(TeclaApp.TAG);
 	}
 
 	public static void cancelFullReset(Runnable mFullResetRunnable) {
@@ -55,12 +55,12 @@ public class Helper {
 	 */
 	public static void holdWakeLock(long length) {
 		if (length > 0) {
-			if (SwitchEventProvider.DEBUG)
-				Log.d(SwitchEventProvider.TAG, "Aquiring temporal wake lock...");
+			if (TeclaApp.DEBUG)
+				Log.d(TeclaApp.TAG, "Aquiring temporal wake lock...");
 			mWakeLock.acquire(length);
 		} else {
-			if (SwitchEventProvider.DEBUG)
-				Log.d(SwitchEventProvider.TAG, "Aquiring wake lock...");
+			if (TeclaApp.DEBUG)
+				Log.d(TeclaApp.TAG, "Aquiring wake lock...");
 			mWakeLock.acquire();
 		}
 		pokeUserActivityTimer();
@@ -76,20 +76,20 @@ public class Helper {
 	}
 
 	public static void holdKeyguardLock() {
-		if (SwitchEventProvider.DEBUG)
-			Log.d(SwitchEventProvider.TAG, "Acquiring keyguard lock...");
+		if (TeclaApp.DEBUG)
+			Log.d(TeclaApp.TAG, "Acquiring keyguard lock...");
 		mKeyguardLock.disableKeyguard();
 	}
 
 	public static void releaseWakeLock() {
-		if (SwitchEventProvider.DEBUG)
-			Log.d(SwitchEventProvider.TAG, "Releasing wake lock...");
+		if (TeclaApp.DEBUG)
+			Log.d(TeclaApp.TAG, "Releasing wake lock...");
 		mWakeLock.release();
 	}
 
 	public static void releaseKeyguardLock() {
-		if (SwitchEventProvider.DEBUG)
-			Log.d(SwitchEventProvider.TAG, "Releasing keyguard lock...");
+		if (TeclaApp.DEBUG)
+			Log.d(TeclaApp.TAG, "Releasing keyguard lock...");
 		mKeyguardLock.reenableKeyguard();
 	}
 

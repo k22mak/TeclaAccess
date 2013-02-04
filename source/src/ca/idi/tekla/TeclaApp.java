@@ -14,7 +14,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.media.AudioManager;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
@@ -346,13 +345,7 @@ public class TeclaApp extends ca.idi.tecla.framework.TeclaApp {
 			}
 		}
 	}
-	
-//	public void startVoiceCommand() {
-//		Intent intent = new Intent(Intent.ACTION_VOICE_COMMAND);
-//		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//		startActivity(intent);
-//	}
-//
+
 	public void broadcastInputViewCreated() {
 		synchronized(this) {
 			sendBroadcast(new Intent(ACTION_IME_CREATED));

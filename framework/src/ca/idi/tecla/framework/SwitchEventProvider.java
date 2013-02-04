@@ -391,40 +391,9 @@ public class SwitchEventProvider extends Service implements Runnable {
 			mSwitchEventIntent.putExtra(SwitchEvent.EXTRA_SWITCH_CHANGES,
 					switchChanges);
 			mSwitchEventIntent.putExtra(SwitchEvent.EXTRA_SWITCH_STATES,
-					switchStates);
-
-			// TODO: Refactor to incorporate default SwitchEvent instead of a creating a temp object
-			SwitchEvent event = new SwitchEvent(mSwitchEventIntent.getExtras());
-
-			if (event.toString() != null) {
-				String[] switchActions = persistence.getSwitchMap().get(
-						event.toString());
-				switch (Integer.parseInt(switchActions[0])) {
-				case 1:
-					Log.i("TEST FOR SWITCH EVENT", "EVENT IS: "+switchActions[0]);
-					mSwitchEventIntent.putExtra(SwitchEvent.EXTRA_INTENT,
-							SwitchEvent.INTENT_DOWN);
-					break;
-				case 2:
-					Log.i("TEST FOR SWITCH EVENT", "EVENT IS: "+switchActions[0]);
-					mSwitchEventIntent.putExtra(SwitchEvent.EXTRA_INTENT,
-							SwitchEvent.INTENT_UP);
-					break;
-				case 3:
-					Log.i("TEST FOR SWITCH EVENT", "EVENT IS: "+switchActions[0]);
-					mSwitchEventIntent.putExtra(SwitchEvent.EXTRA_INTENT,
-							SwitchEvent.INTENT_RIGHT);
-					break;
-				case 4:
-					Log.i("TEST FOR SWITCH EVENT", "EVENT IS: "+switchActions[0]);
-					mSwitchEventIntent.putExtra(SwitchEvent.EXTRA_INTENT,
-							SwitchEvent.INTENT_LEFT);
-					break;
-				default:
-					Log.i("TEST FOR SWITCH EVENT", "EVENT IS: "+switchActions[0]);
-					break;
-				}
-			}
+					switchStates);	
+			mSwitchEventIntent.putExtra(SwitchEvent.EXTRA_INTENT,
+					switchChanges);
 
 			// Broadcast event
 			sendBroadcast(mSwitchEventIntent);

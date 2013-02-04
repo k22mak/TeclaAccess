@@ -52,6 +52,8 @@ public class TeclaApp extends ca.idi.tecla.framework.TeclaApp {
 	public static final String ACTION_STOP_FS_SWITCH_MODE = "ca.idi.tekla.ime.action.STOP_FS_SWITCH_MODE";
 	public static final String ACTION_INPUT_STRING = "ca.idi.tekla.ime.action.INPUT_STRING";
 	public static final String EXTRA_INPUT_STRING = "ca.idi.tekla.sep.extra.INPUT_STRING";
+	public static final String ACTION_DISABLE_TECLA_IME = "ca.idi.tekla.sdk.action.DISABLE_TECLA_IME";
+	public static final String ACTION_ENABLE_TECLA_IME = "ca.idi.tekla.sdk.action.ENABLE_TECLA_IME";
 	private static final long BOOT_TIMEOUT = 60000;
 	
 	

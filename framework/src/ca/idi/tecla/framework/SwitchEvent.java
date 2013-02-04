@@ -16,6 +16,7 @@ public class SwitchEvent {
 	public static final String ACTION_SWITCH_EVENT_RECEIVED = "ca.idi.tekla.sdk.action.SWITCH_EVENT_RECEIVED";
 	public static final String EXTRA_SWITCH_CHANGES = "ca.idi.tekla.sdk.extra.SWITCH_CHANGES";
 	public static final String EXTRA_SWITCH_STATES = "ca.idi.tekla.sdk.extra.SWITCH_STATES";
+	public static final String EXTRA_INTENT = "ca.idi.tekla.sdk.extra.INTENT";
 	
 	// MASKS FOR READING SWITCH STATES
 	public static final int SWITCH_J1 = 0x01; //Forward / Up
@@ -24,6 +25,11 @@ public class SwitchEvent {
 	public static final int SWITCH_J4 = 0x08; //Right
 	public static final int SWITCH_E1 = 0x10;
 	public static final int SWITCH_E2 = 0x20;
+	
+	public static final String INTENT_LEFT = "3";
+	public static final String INTENT_RIGHT = "4";
+	public static final String INTENT_UP = "2";
+	public static final String INTENT_DOWN = "1";
 
 	private int switch_changes, switch_states;
 	

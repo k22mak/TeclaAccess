@@ -118,6 +118,4 @@ public class Helper {
 		mAudioManager.setMode(AudioManager.MODE_NORMAL);
 		mAudioManager.setSpeakerphoneOn(false);
 	}
-
-
 }

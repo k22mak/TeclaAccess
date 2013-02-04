@@ -26,7 +26,7 @@ public class TeclaApp extends Application
 	public static final boolean DEBUG = true	;
 
 	
-	private static Persistence persistence;
+	public static Persistence persistence;
 	private PowerManager power_manager;
 	private Boolean screen_on;
 

@@ -101,7 +101,7 @@ public class Helper {
 		return String.format("0x%02x", bite);
 	}
 
-	public void showToast(String msg, Context context) {
+	public static void showToast(String msg, Context context) {
 		Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
 	}
 

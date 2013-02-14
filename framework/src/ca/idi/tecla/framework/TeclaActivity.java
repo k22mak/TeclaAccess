@@ -20,7 +20,7 @@ public abstract class TeclaActivity extends Activity {
 			// TODO Auto-generated method stub
 			Bundle switchIntent = intent.getExtras();
 
-			switch (switchIntent.getInt(SwitchEvent.EXTRA_INTENT)) {
+			switch (switchIntent.getInt(SwitchEvent.EXTRA_SWITCH_CHANGES)) {
 			case 1:
 				intentDown();
 				break;
@@ -77,7 +77,8 @@ public abstract class TeclaActivity extends Activity {
 	public abstract void intentButtonOne();
 
 	public abstract void intentButtonTwo();
-
+	
+	
 	private void broadcastDisableTeclaIME() {
 		Intent intent = new Intent(ACTION_DISABLE_TECLA_IME);
 		sendBroadcast(intent);
@@ -87,5 +88,5 @@ public abstract class TeclaActivity extends Activity {
 		Intent intent = new Intent(ACTION_ENABLE_TECLA_IME);
 		sendBroadcast(intent);
 	}
-
+	
 }

@@ -790,6 +790,7 @@ public class TeclaIME extends InputMethodService implements
 				persistence.setTeclaForegroundOff();
 			}
 			if (action.equals(TeclaApp.ACTION_ENABLE_TECLA_IME)) {
+				showIMEView();
 				persistence.setTeclaForegroundOn();
 			}
 		}

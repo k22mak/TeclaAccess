@@ -249,8 +249,6 @@ public class TeclaApp extends ca.idi.tecla.framework.TeclaApp {
 	}
 	
 
-
-
 	public void candidatesAvailable() {
 		//TODO: Sends list of candidates to IME for user selection
 	}

@@ -10,6 +10,9 @@ import android.util.Log;
 
 public abstract class TeclaActivity extends Activity {
 
+	public static final boolean DEBUG = true;
+	public static final String TAG = "TeclaActivity";
+	
 	private static final String ACTION_DISABLE_TECLA_IME = "ca.idi.tekla.sdk.action.DISABLE_TECLA_IME";
 	private static final String ACTION_ENABLE_TECLA_IME = "ca.idi.tekla.sdk.action.ENABLE_TECLA_IME";
 
@@ -18,8 +21,11 @@ public abstract class TeclaActivity extends Activity {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			// TODO Auto-generated method stub
+			if (DEBUG) {
+				Log.i(TAG, "Received Intent from SEP");
+			}
 			Bundle switchIntent = intent.getExtras();
-
+			
 			switch (switchIntent.getInt(SwitchEvent.EXTRA_SWITCH_CHANGES)) {
 			case 1:
 				intentDown();
@@ -46,16 +52,13 @@ public abstract class TeclaActivity extends Activity {
 	};
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-	}
-
-	@Override
 	public void onResume() {
 		super.onResume();
 		registerReceiver(mReceiver, new IntentFilter(
 				SwitchEvent.ACTION_SWITCH_EVENT_RECEIVED));
-		Log.i("Registering Receiver", "Registering Receiver");
+		if (DEBUG) {
+			Log.i(TAG, "Registered Receiver");
+		}
 		broadcastDisableTeclaIME();
 	}
 
@@ -77,16 +80,21 @@ public abstract class TeclaActivity extends Activity {
 	public abstract void intentButtonOne();
 
 	public abstract void intentButtonTwo();
-	
-	
+
 	private void broadcastDisableTeclaIME() {
 		Intent intent = new Intent(ACTION_DISABLE_TECLA_IME);
 		sendBroadcast(intent);
+		if (DEBUG) {
+			Log.i(TAG, "Send Broadcast Disabling Tecla Default");
+		}
 	}
 
 	private void broadcastEnableTeclaIME() {
 		Intent intent = new Intent(ACTION_ENABLE_TECLA_IME);
 		sendBroadcast(intent);
+		if (DEBUG) {
+			Log.i(TAG, "Send Broadcast Enabling Tecla Default");
+		}
 	}
-	
+
 }

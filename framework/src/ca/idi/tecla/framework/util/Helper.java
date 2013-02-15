@@ -5,7 +5,6 @@ import android.app.KeyguardManager;
 import android.app.KeyguardManager.KeyguardLock;
 import android.content.Context;
 import android.media.AudioManager;
-import android.os.Handler;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.PowerManager.WakeLock;
@@ -16,7 +15,6 @@ public class Helper {
 	private static PowerManager mPowerManager;
 	private static WakeLock mWakeLock;
 	private static KeyguardLock mKeyguardLock;
-	private static Handler mHandler;
 	private static KeyguardManager mKeyguardManager;
 	private static AudioManager mAudioManager;
 	private static final int WAKE_LOCK_TIMEOUT = 5000;
@@ -34,10 +32,6 @@ public class Helper {
 				.getSystemService(keyguardService);
 		mKeyguardLock = mKeyguardManager
 				.newKeyguardLock(TeclaApp.TAG);
-	}
-
-	public static void cancelFullReset(Runnable mFullResetRunnable) {
-		mHandler.removeCallbacks(mFullResetRunnable);
 	}
 
 	/**

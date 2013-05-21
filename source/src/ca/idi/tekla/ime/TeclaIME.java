@@ -694,7 +694,7 @@ public class TeclaIME extends InputMethodService implements
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
-
+			Log.i("GOT SOME ACTION","GOT SOME ACTION");
 			if (action.equals(AudioManager.RINGER_MODE_CHANGED_ACTION))
 				// receive ringer mode changes to detect silent mode
 				updateRingerMode();
@@ -786,10 +786,12 @@ public class TeclaIME extends InputMethodService implements
 				mLastFullKeyboardMode = KeyboardSwitcher.MODE_TEXT;
 			}
 			if (action.equals(TeclaApp.ACTION_DISABLE_TECLA_IME)) {
+				Log.i(TeclaApp.TAG,"Disabling Tecla Receiver");
 				hideSoftIME();
 				persistence.setTeclaForegroundOff();
 			}
 			if (action.equals(TeclaApp.ACTION_ENABLE_TECLA_IME)) {
+				Log.i(TeclaApp.TAG,"Enabling Tecla Receiver");
 				showIMEView();
 				persistence.setTeclaForegroundOn();
 			}

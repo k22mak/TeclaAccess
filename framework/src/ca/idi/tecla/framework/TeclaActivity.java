@@ -50,7 +50,7 @@ public abstract class TeclaActivity extends Activity {
 			}
 		}
 	};
-
+	
 	@Override
 	public void onResume() {
 		super.onResume();
@@ -85,7 +85,7 @@ public abstract class TeclaActivity extends Activity {
 		Intent intent = new Intent(ACTION_DISABLE_TECLA_IME);
 		sendBroadcast(intent);
 		if (DEBUG) {
-			Log.i(TAG, "Send Broadcast Disabling Tecla Default");
+			Log.i(TAG, "Sent Broadcast Disabling Tecla Default");
 		}
 	}
 
@@ -93,7 +93,7 @@ public abstract class TeclaActivity extends Activity {
 		Intent intent = new Intent(ACTION_ENABLE_TECLA_IME);
 		sendBroadcast(intent);
 		if (DEBUG) {
-			Log.i(TAG, "Send Broadcast Enabling Tecla Default");
+			Log.i(TAG, "Sent Broadcast Enabling Tecla Default");
 		}
 	}
 

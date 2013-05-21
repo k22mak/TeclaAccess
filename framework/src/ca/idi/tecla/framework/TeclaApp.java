@@ -44,7 +44,7 @@ public class TeclaApp extends Application
 		power_manager = (PowerManager) getSystemService(Context.POWER_SERVICE);
 
 		screen_on = true;
-		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.ECLAIR_MR1)
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.ECLAIR)
 		{
 			screen_on = getScreenState();
 		}
@@ -67,7 +67,7 @@ public class TeclaApp extends Application
 
 			if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
 				screen_on = false;
-				if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.ECLAIR_MR1)
+				if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.ECLAIR)
 				{
 					screen_on = getScreenState();
 				}
@@ -75,7 +75,7 @@ public class TeclaApp extends Application
 			}
 			if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)) {
 				screen_on = true;
-				if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.ECLAIR_MR1)
+				if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.ECLAIR)
 				{
 					screen_on = getScreenState();
 				}
@@ -89,7 +89,7 @@ public class TeclaApp extends Application
 		return persistence;
 	}
 	
-	@TargetApi(Build.VERSION_CODES.ECLAIR_MR1)
+	@TargetApi(Build.VERSION_CODES.ECLAIR)
 	private Boolean getScreenState() {
 		return power_manager.isScreenOn();		
 	}
